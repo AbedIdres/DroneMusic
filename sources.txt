@@ -1,0 +1,5 @@
+https://github.com/aubio/aubio/blob/master/python/demos/demo_pyaudio.py
+
+https://github.com/aubio/aubio/issues/78
+
+https://gist.github.com/notalentgeek/48aeab398b6b74e3a9134a61b6b79a36
