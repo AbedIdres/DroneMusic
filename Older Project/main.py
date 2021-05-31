@@ -28,7 +28,7 @@ def funcRight():
 def funcLeft():
     # put your left code here
     print("sure, going left!")
-    my_drone.left(speed)
+    my_drone.forward(speed)
     #my_drone.cw(90)
 
     return
