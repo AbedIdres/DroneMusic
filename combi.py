@@ -28,7 +28,7 @@ VOLUME_TIMEFRAME = 250000
 THESHHOLD = 0.0
 pitchList = [35, 45, 55, 65, 75, 85]
 PITCH_COUNTER_THRESH = 3
-VOLUME_THRESH = 1.0
+VOLUME_THRESH = 5.0
 
 
 def main(args):
@@ -91,13 +91,13 @@ def main(args):
             else:
                 volume_average = 0
             #print(volume_list)
-            print("volume_average = " + str(volume_average))
+            #print("volume_average = " + str(volume_average))
             if volume_average > VOLUME_THRESH and volume_power < 10:
                 volume_power = volume_power + 1
                 print("Added 1 to volume power, now its " + str(volume_power))
             else:
                 if volume_power > 0:
-                    volume_power = volume_power // 2
+                    volume_power = volume_power // 3
                     print("subtracted 1 to volume power, now its " + str(volume_power))
             volume_list = []
             volume_past = volume_present
@@ -125,7 +125,8 @@ def main(args):
             max_value_index = pitch_counter.index(max_value)
             # if max value counter is higher than threshold then print pitch
             if max_value > PITCH_COUNTER_THRESH:
-                print("pitch is " + str(pitchList[max_value_index]))
+                pass
+                #print("pitch is " + str(pitchList[max_value_index]))
 
             # reset values of pitch_list and pitch counter
             pitch_list = []
