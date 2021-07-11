@@ -12,6 +12,7 @@ import pyaudio
 import sys
 import aubio
 import datetime
+from easytello import tello
 
 # Some constants for setting the PyAudio and the
 # Aubio.
@@ -24,11 +25,11 @@ HOP_SIZE = BUFFER_SIZE // 2
 PERIOD_SIZE_IN_FRAME = HOP_SIZE
 SECONDS_IN_MINUT = 60
 PITCH_TIMEFRAME = 1
-VOLUME_TIMEFRAME = 250000
-THESHHOLD = 0.0
+VOLUME_TIMEFRAME = 800000
+PITCH_THESHHOLD = 0.0
 pitchList = [35, 45, 55, 65, 75, 85]
 PITCH_COUNTER_THRESH = 3
-VOLUME_THRESH = 5.0
+VOLUME_THRESH = 100.0
 
 
 def main(args):
@@ -70,7 +71,7 @@ def main(args):
         pitch = pitch_o(signal)[0]
         confidence = pitch_o.get_confidence()
 
-        if pitch > THESHHOLD:
+        if pitch > PITCH_THESHHOLD:
             pitch_list.append(pitch)
         # Compute the energy (volume)
         # of the current frame.
@@ -126,8 +127,10 @@ def main(args):
             # if max value counter is higher than threshold then print pitch
             if max_value > PITCH_COUNTER_THRESH:
                 pass
-                #print("pitch is " + str(pitchList[max_value_index]))
-
+                print("pitch is " + str(pitchList[max_value_index]))
+            else:
+                pass
+                print("No pitch is detected ")
             # reset values of pitch_list and pitch counter
             pitch_list = []
             pitch_counter = [0, 0, 0, 0, 0, 0]
