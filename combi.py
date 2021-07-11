@@ -12,6 +12,7 @@ import pyaudio
 import sys
 import aubio
 import datetime
+import time
 from easytello import tello
 
 # Some constants for setting the PyAudio and the
@@ -24,12 +25,13 @@ SAMPLE_RATE = 44100
 HOP_SIZE = BUFFER_SIZE // 2
 PERIOD_SIZE_IN_FRAME = HOP_SIZE
 SECONDS_IN_MINUT = 60
-PITCH_TIMEFRAME = 1
+PITCH_TIMEFRAME = 2
 VOLUME_TIMEFRAME = 800000
 PITCH_THESHHOLD = 0.0
 pitchList = [35, 45, 55, 65, 75, 85]
 PITCH_COUNTER_THRESH = 3
 VOLUME_THRESH = 100.0
+MOVING_DISTANCE = 15
 
 
 def main(args):
@@ -53,16 +55,20 @@ def main(args):
     volume_past = datetime.datetime.now()
     pitch_list = []
     pitch_counter = [0, 0, 0, 0, 0, 0]
+    height = [0, 1, 0, 0, 0, 0]
 
     volume_list = []
     volume_power = 0
+    my_drone = tello.Tello()
+    my_drone.takeoff()
+
+
     while True:
 
         # Always listening to the microphone.
         data = mic.read(BUFFER_SIZE)
         # Convert into number that Aubio understand.
-        samples = np.frombuffer(data,
-                                dtype=aubio.float_type)
+        samples = np.frombuffer(data, dtype=aubio.float_type)
 
         # Finally get the pitch.
         # pitch = pDetection(samples)[0]
@@ -84,8 +90,12 @@ def main(args):
         volume = "{:6f}".format(volume)
         # print(str(volume))
 
+        ############################VOLUME############################
         volume_present = datetime.datetime.now()
         volume_time_difference = volume_present - volume_past
+
+
+
         if volume_time_difference.microseconds > VOLUME_TIMEFRAME:
             if len(volume_list) != 0:
                 volume_average = sum(volume_list) / len(volume_list)
@@ -102,6 +112,11 @@ def main(args):
                     print("subtracted 1 to volume power, now its " + str(volume_power))
             volume_list = []
             volume_past = volume_present
+
+
+
+
+        ############################PITCH############################
 
         pitch_present = datetime.datetime.now()
         pitch_time_difference = pitch_present - pitch_past
@@ -125,9 +140,26 @@ def main(args):
             max_value = max(pitch_counter)
             max_value_index = pitch_counter.index(max_value)
             # if max value counter is higher than threshold then print pitch
+
+            # get current height
+            height_index = height.index(max(height))
+
+
+
+
+
             if max_value > PITCH_COUNTER_THRESH:
                 pass
                 print("pitch is " + str(pitchList[max_value_index]))
+                # check which direction to move
+                difference = (max_value_index - height_index) * MOVING_DISTANCE
+                if difference > 0:
+                    my_drone.up(difference)
+                elif difference < 0:
+                    my_drone.down(-difference)
+
+                height[height_index] = 0
+                height[max_value_index] = 1
             else:
                 pass
                 print("No pitch is detected ")
@@ -136,5 +168,30 @@ def main(args):
             pitch_counter = [0, 0, 0, 0, 0, 0]
             pitch_past = pitch_present
 
+
+def dance(my_drone):
+
+    my_drone.takeoff()
+
+    while 1:
+        command = input("Enter command, UP, DOWN, LEFT , RIGHT , LAND , FORWARD , BACK:")
+        if command == "UP":
+            my_drone.up(MOVING_DISTANCE)
+        elif command == "DOWN":
+            my_drone.down(MOVING_DISTANCE)
+        elif command == "LEFT":
+            my_drone.left(MOVING_DISTANCE)
+        elif command == "RIGHT":
+            my_drone.right(MOVING_DISTANCE)
+        elif command == "LAND":
+            my_drone.land()
+        elif command == "FORWARD":
+            my_drone.forward(MOVING_DISTANCE)
+        elif command == "BACK":
+            my_drone.back(MOVING_DISTANCE)
+        else:
+            my_drone.flip(360)
+
+        my_drone.wait(2)
 
 if __name__ == "__main__": main(sys.argv)
